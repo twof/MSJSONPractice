@@ -20,13 +20,16 @@ class ViewController: UIViewController {
     @IBOutlet weak var priceLabel: UILabel!
     @IBOutlet weak var posterImageView: UIImageView!
     
+    var randomMovie : Movie!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        exerciseOne()
-        exerciseTwo()
-        exerciseThree()
+        //exerciseOne()
+        //exerciseTwo()
+        //exerciseThree()
         
         let apiToContact = "https://itunes.apple.com/us/rss/topmovies/limit=25/json"
         // This code will call the iTunes top 25 movies endpoint listed above
@@ -36,10 +39,20 @@ class ViewController: UIViewController {
                 if let value = response.result.value {
                     let json = JSON(value)
                     
+                    let numMovies = UInt32(json["feed"]["entry"].count)
+                    let rand = Int(arc4random_uniform(numMovies))
                     // Do what you need to with JSON here!
                     // The rest is all boiler plate code you'll use for API requests
+                    let randomMovieJson = json["feed"]["entry"][rand]
+                    self.randomMovie = Movie(json: randomMovieJson)
                     
+                    self.movieTitleLabel.text = self.randomMovie.name
+                    self.rightsOwnerLabel.text = self.randomMovie.rightsOwner
+                    self.releaseDateLabel.text = self.randomMovie.releaseDate
+                    self.priceLabel.text = self.randomMovie.price.description
                     
+                    self.loadPoster(self.randomMovie.posterURL)
+
                 }
             case .Failure(let error):
                 print(error)
@@ -58,7 +71,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func viewOniTunesPressed(sender: AnyObject) {
-        
+        UIApplication.sharedApplication().openURL(NSURL(string:self.randomMovie.link)!)
     }
     
 }
